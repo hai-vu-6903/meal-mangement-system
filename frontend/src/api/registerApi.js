@@ -53,7 +53,21 @@ const registerApi = {
   // Cập nhật ghi chú
   updateNotes: (registrationId, notes) => {
     return axiosClient.put(`/register/${registrationId}/notes`, { notes })
-  }
+  },
+
+  // Lấy đăng ký của một quân nhân theo tháng
+  getRegistrationsByUser: (militaryCode, startDate, endDate) => {
+    return axiosClient.get(`/register/user/${militaryCode}`, {
+      params: { start_date: startDate, end_date: endDate }
+    });
+  },
+
+  // Thêm API mới: lấy thống kê đăng ký cá nhân theo tháng
+getMyMonthlyRegistrations : (month, year) => {
+  return axiosClient.get('/register/my-monthly-registrations', {
+    params: { month, year }
+  });
+}
 }
 
 export default registerApi

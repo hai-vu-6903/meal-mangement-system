@@ -488,7 +488,100 @@ checkRegistrationStatus: async (req, res) => {
         message: 'Lỗi server'
       });
     }
+  },
+
+  // Thêm vào registerController.js
+getMonthlyUserRegistrations: async (req, res) => {
+  try {
+    const userId = req.user.id;
+    let { month, year } = req.query; // month: 1-12, year: yyyy
+
+    const now = new Date();
+    month = month ? parseInt(month) : now.getMonth() + 1; // tháng hiện tại
+    year = year ? parseInt(year) : now.getFullYear(); // năm hiện tại
+
+    const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+    const endDateObj = new Date(year, month, 0); // ngày cuối tháng
+    const endDate = `${year}-${month.toString().padStart(2, '0')}-${endDateObj.getDate()}`;
+
+    // Lấy tất cả đăng ký của user trong tháng
+    const [registrations] = await db.execute(
+      `SELECT mr.*, m.meal_type, m.meal_name
+       FROM meal_registrations mr
+       JOIN meals m ON mr.meal_id = m.id
+       WHERE mr.user_id = ? 
+         AND mr.status = 'registered'
+         AND mr.registration_date BETWEEN ? AND ?
+       ORDER BY mr.registration_date, m.meal_type`,
+      [userId, startDate, endDate]
+    );
+
+    // Tính thống kê
+    const counts = { breakfast: 0, lunch: 0, dinner: 0 };
+    registrations.forEach(reg => {
+      if (reg.meal_type === 'breakfast') counts.breakfast += 1;
+      if (reg.meal_type === 'lunch') counts.lunch += 1;
+      if (reg.meal_type === 'dinner') counts.dinner += 1;
+    });
+
+    res.json({
+      success: true,
+      data: {
+        registrations,
+        stats: [
+          { meal_type: 'breakfast', count: counts.breakfast },
+          { meal_type: 'lunch', count: counts.lunch },
+          { meal_type: 'dinner', count: counts.dinner }
+        ]
+      }
+    });
+  } catch (error) {
+    console.error('Get monthly user registrations error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi server'
+    });
   }
+},
+
+// Lấy đăng ký cá nhân theo tháng
+getMyMonthlyRegistrations: async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { month, year } = req.query;
+
+    if (!month || !year) {
+      return res.status(400).json({ success: false, message: "Thiếu month hoặc year" });
+    }
+
+    // Xây dựng ngày bắt đầu và kết thúc của tháng
+    const startDate = `${year}-${month.toString().padStart(2,'0')}-01`;
+    const endDateObj = new Date(year, month, 0); // ngày cuối cùng của tháng
+    const endDate = `${year}-${month.toString().padStart(2,'0')}-${endDateObj.getDate().toString().padStart(2,'0')}`;
+
+    // Lấy tất cả đăng ký của user trong tháng
+    const [registrations] = await db.execute(`
+      SELECT 
+        mr.registration_date AS date,
+        SUM(CASE WHEN m.meal_type = 'breakfast' THEN 1 ELSE 0 END) AS breakfast,
+        SUM(CASE WHEN m.meal_type = 'lunch' THEN 1 ELSE 0 END) AS lunch,
+        SUM(CASE WHEN m.meal_type = 'dinner' THEN 1 ELSE 0 END) AS dinner
+      FROM meal_registrations mr
+      JOIN meals m ON mr.meal_id = m.id
+      WHERE mr.user_id = ? 
+        AND mr.registration_date BETWEEN ? AND ? 
+        AND mr.status = 'registered'
+      GROUP BY mr.registration_date
+      ORDER BY mr.registration_date
+    `, [userId, startDate, endDate]);
+
+    res.json({ success: true, data: registrations });
+  } catch (error) {
+    console.error('Get my monthly registrations error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi server', error: error.message });
+  }
+},
+
 };
 
 module.exports = registerController;

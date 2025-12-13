@@ -8,7 +8,6 @@ import Stats from './pages/Admin/Stats'
 import UnitManager from './pages/Admin/UnitManager'
 import SystemConfig from './pages/Admin/SystemConfig'
 import MealRegister from './pages/Soldier/MealRegister'
-import MealStats from './pages/Soldier/MealStats'
 import Profile from './pages/Soldier/Profile'
 import NotFound from './pages/NotFound'
 import PrivateRoute from './components/PrivateRoute'
@@ -79,14 +78,6 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute role="soldier">
         <MealRegister />
-      </PrivateRoute>
-    )
-  },
-  {
-    path: '/soldier/stats',
-    element: (
-      <PrivateRoute role="soldier">
-        <MealStats />
       </PrivateRoute>
     )
   },

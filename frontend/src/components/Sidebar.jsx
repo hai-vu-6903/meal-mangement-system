@@ -82,7 +82,6 @@ const Sidebar = () => {
 
   const soldierMenu = [
     { path: '/soldier', icon: FaCalendarAlt, label: 'Đăng ký suất ăn' },
-    { path: '/soldier/stats', icon: FaChartBar, label: 'Thống kê cá nhân' },
     { path: '/soldier/profile', icon: FaUser, label: 'Hồ sơ cá nhân' },
   ]
 

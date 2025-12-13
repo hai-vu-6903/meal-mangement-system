@@ -24,4 +24,12 @@ router.get('/history', registerController.getRegistrationHistory);
 // Cập nhật
 router.put('/:registrationId/notes', registerController.updateRegistrationNotes);
 
+// Thống kê tháng cho user
+router.get('/my-monthly-registrations', registerController.getMonthlyUserRegistrations);
+
+// routes/registerRoutes.js
+
+// Dưới các route hiện có
+router.get('/my-monthly-registrations', registerController.getMyMonthlyRegistrations);
+
 module.exports = router;
