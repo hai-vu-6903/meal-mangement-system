@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Header from '../../components/Header'
-import Sidebar from '../../components/Sidebar'
+import Layout from '../../components/layout/Layout'
 import { BarChart, PieChart } from '../../components/Chart'
 import userApi from '../../api/userApi'
 import statsApi from '../../api/statsApi'
@@ -17,19 +16,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null)
   const [trendData, setTrendData] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [isMobile, setIsMobile] = useState(false)
 
-  // 📌 Responsive Layout
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024)
-    }
-    checkScreenSize()
-    window.addEventListener('resize', checkScreenSize)
-    return () => window.removeEventListener('resize', checkScreenSize)
-  }, [])
-
-  // 📌 Load Dashboard Data
   useEffect(() => {
     fetchDashboardData()
   }, [])
@@ -60,7 +47,6 @@ const AdminDashboard = () => {
     return roleStat ? roleStat.count : 0
   }
 
-  // 📌 Cards hiển thị thống kê
   const statCards = [
     {
       title: 'Tổng quân nhân',
@@ -92,7 +78,6 @@ const AdminDashboard = () => {
     }
   ]
 
-  // 📌 Chuẩn bị dữ liệu Bar Chart
   const prepareChartData = () => {
     if (!trendData?.chartData) return null
 
@@ -129,7 +114,6 @@ const AdminDashboard = () => {
     }
   }
 
-  // 📌 Chuẩn bị dữ liệu Pie Chart
   const preparePieData = () => {
     if (!stats?.unit_stats) return null
 
@@ -151,115 +135,96 @@ const AdminDashboard = () => {
     }
   }
 
-  // 📌 Loading UI
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex">
-          <Sidebar />
-          <div className="flex-1 p-8">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="h-32 bg-gray-200 rounded"></div>
-                ))}
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="h-80 bg-gray-200 rounded"></div>
-                <div className="h-80 bg-gray-200 rounded"></div>
-              </div>
-            </div>
+      <Layout>
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-80 bg-gray-200 rounded"></div>
+            <div className="h-80 bg-gray-200 rounded"></div>
           </div>
         </div>
-      </div>
+      </Layout>
     )
   }
 
-  // 📌 Render giao diện chính
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex">
-        <Sidebar />
-
-        <main className={`flex-1 transition-all duration-300 ${isMobile ? 'p-2' : 'p-6'} pt-20 lg:pt-6`}>
-          <div className={isMobile ? 'p-2' : 'mb-6'}>
-            <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-            <p className="text-gray-600">Tổng quan hệ thống</p>
-          </div>
-
-          {/* Cards thống kê */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {statCards.map((card, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-md p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 text-sm">{card.title}</p>
-                    <p className="text-2xl font-bold mt-2">{card.value}</p>
-                  </div>
-                  <div className={`p-3 rounded-lg ${card.color} bg-opacity-10`}>
-                    <card.icon className={`text-2xl ${card.textColor}`} />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Biểu đồ */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-700">Xu hướng đăng ký (7 ngày)</h3>
-                <FaChartLine className="text-blue-500" />
-              </div>
-              {trendData && (
-                <div className="h-72">
-                  <BarChart data={prepareChartData()} title="" />
-                </div>
-              )}
-            </div>
-
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-700">Phân bố theo đơn vị</h3>
-                <FaBuilding className="text-purple-500" />
-              </div>
-              {stats?.unit_stats && (
-                <div className="h-72">
-                  <PieChart data={preparePieData()} title="" />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Hoạt động gần đây */}
-          <div className="mt-6 bg-white rounded-xl shadow-md p-6">
-            <h3 className="font-semibold text-gray-700 mb-4">Hoạt động gần đây</h3>
-            <div className="space-y-4">
-              {stats?.unit_stats?.slice(0, 5).map((unit, index) => (
-                <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <FaCalendarDay className="text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{unit.unit_name || 'Chưa phân đơn vị'}</p>
-                      <p className="text-sm text-gray-500">
-                        {unit.user_count} người • {unit.meal_count} suất ăn
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-500">Hôm nay</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </main>
+    <Layout>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+        <p className="text-gray-600">Tổng quan hệ thống</p>
       </div>
-    </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {statCards.map((card, index) => (
+          <div key={index} className="bg-white rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm">{card.title}</p>
+                <p className="text-2xl font-bold mt-2">{card.value}</p>
+              </div>
+              <div className={`p-3 rounded-lg ${card.color} bg-opacity-10`}>
+                <card.icon className={`text-2xl ${card.textColor}`} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-700">Xu hướng đăng ký (7 ngày)</h3>
+            <FaChartLine className="text-blue-500" />
+          </div>
+          {trendData && (
+            <div className="h-72">
+              <BarChart data={prepareChartData()} title="" />
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-700">Phân bố theo đơn vị</h3>
+            <FaBuilding className="text-purple-500" />
+          </div>
+          {stats?.unit_stats && (
+            <div className="h-72">
+              <PieChart data={preparePieData()} title="" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-6 bg-white rounded-xl shadow-md p-6">
+        <h3 className="font-semibold text-gray-700 mb-4">Hoạt động gần đây</h3>
+        <div className="space-y-4">
+          {stats?.unit_stats?.slice(0, 5).map((unit, index) => (
+            <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <FaCalendarDay className="text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{unit.unit_name || 'Chưa phân đơn vị'}</p>
+                  <p className="text-sm text-gray-500">
+                    {unit.user_count} người • {unit.meal_count} suất ăn
+                  </p>
+                </div>
+              </div>
+              <span className="text-sm text-gray-500">Hôm nay</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Layout>
   )
 }
 

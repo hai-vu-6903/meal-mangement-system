@@ -1,29 +1,17 @@
-import React, { useState, useEffect } from 'react'
+// App.jsx
+import React from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import { router } from './router'
 import './styles/global.css'
-import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024)
-    }
-
-    checkScreenSize()
-    window.addEventListener('resize', checkScreenSize)
-    return () => window.removeEventListener('resize', checkScreenSize)
-  }, [])
-
   return (
     <AuthProvider>
       <div className="min-h-screen bg-gray-50">
         <Toaster 
-          position={isMobile ? "top-center" : "top-right"}
+          position="top-right"
           toastOptions={{
             duration: 3000,
             style: {
@@ -31,7 +19,6 @@ function App() {
               color: '#fff',
               borderRadius: '8px',
               padding: '16px',
-              fontSize: isMobile ? '14px' : '16px',
             },
             success: {
               duration: 3000,
